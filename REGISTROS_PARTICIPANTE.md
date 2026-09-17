@@ -29,3 +29,5 @@ Caso utilize este espaço, organize o conteúdo da maneira que preferir.
 ---
 
 Registros
+
+Tive muita dificuldade de ler todo o projeto e implementa-lo em pouco tempo , gastei muito tempo tentando entender como as coisas funcionavam e testando e sobrou pouco para a implementação de fato

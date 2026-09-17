@@ -14,6 +14,10 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Instruções personalizadas
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
+
   const messagesRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -141,6 +145,7 @@ function App() {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch {}
+
     localStorage.removeItem("access_token");
     localStorage.removeItem("user_email");
     setToken(null);
@@ -149,6 +154,7 @@ function App() {
     setActiveSessionId(null);
     setMessages([]);
     setError("");
+    setInstructionsOpen(false);
   };
 
   const onStop = () => {
@@ -173,6 +179,7 @@ function App() {
     ]);
     setText("");
     setBusy(true);
+
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
@@ -204,8 +211,10 @@ function App() {
           );
         }
       }
+
       // Refresh sessions from server to stay in sync
       refreshSessions();
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId && !msg.content.trim()
@@ -215,12 +224,19 @@ function App() {
       );
     } catch (err) {
       const aborted = err?.name === "AbortError";
+
       if (!aborted) {
         setError(err.message || "Falha inesperada ao gerar resposta.");
+
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId
-              ? { ...msg, content: msg.content.trim() ? msg.content : "Nao foi possivel obter resposta do modelo agora." }
+              ? {
+                  ...msg,
+                  content: msg.content.trim()
+                    ? msg.content
+                    : "Nao foi possivel obter resposta do modelo agora.",
+                }
               : msg
           )
         );
@@ -265,13 +281,41 @@ function App() {
                 <line x1="3" y1="14" x2="15" y2="14" />
               </svg>
             </button>
+
             <div className="brand">ChatLLM Lab</div>
           </div>
+
           <div className="header-right">
             <span className="user-email">{userEmail}</span>
-            <button className="logout-btn" onClick={handleLogout}>Sair</button>
+
+            <button
+              className="instructions-btn"
+              onClick={() => setInstructionsOpen(true)}
+            >
+              Instruções
+            </button>
+
+            <button className="logout-btn" onClick={handleLogout}>
+              Sair
+            </button>
           </div>
         </header>
+
+        {instructionsOpen && (
+          <div className="instructions-overlay">
+            <div className="instructions-modal">
+              <h2>Instruções</h2>
+
+              <textarea
+                placeholder="Digite suas instruções..."
+              />
+
+              <button onClick={() => setInstructionsOpen(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
 
         <section className="messages" aria-live="polite" ref={messagesRef}>
           <div className="messages-inner">
@@ -298,4 +342,3 @@ function App() {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
-
